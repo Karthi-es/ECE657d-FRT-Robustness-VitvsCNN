@@ -1,0 +1,50 @@
+# Training Configuration for VGGFace2 Identity Classification
+# Week 1: Head-only fine-tuning
+
+# Data Configuration
+data:
+  csv_path: "data/metadata/vggface2_subset.csv"
+  batch_size: 64          # Batch size (adjust if GPU OOM)
+  num_workers: 4          # Data loading workers
+  image_size: [224, 224]  # Input image size
+  
+# Model Configuration
+model:
+  architectures:
+    - resnet50              # CNN baseline
+    - vit_b16              # Vision Transformer
+  pretrained: true         # ImageNet pretraining
+  num_identities: 500      # VGGFace2 test set has 500 identities
+  
+# Training Configuration (Head-only fine-tuning)
+training:
+  epochs: 20
+  learning_rate: 0.001     # LR for head ONLY (backbone frozen)
+  optimizer: "SGD"
+  momentum: 0.9
+  weight_decay: 0.0001     # L2 regularization
+  scheduler: "StepLR"
+  lr_decay_step: 10        # Decay every 10 epochs
+  lr_decay_gamma: 0.5      # Multiply LR by 0.5
+  
+# Validation Configuration
+validation:
+  val_frequency: 1         # Validate every epoch
+  save_best_only: true     # Only save best checkpoint
+  
+# Hardware Configuration
+hardware:
+  device: "cuda"           # CUDA or CPU
+  seed: 42                 # Reproducibility
+  
+# Logging Configuration
+logging:
+  use_wandb: false         # Set to true to enable W&B logging
+  project_name: "ece657d-frt"
+  checkpoint_dir: "models/checkpoints"
+  save_history: true
+  
+# Week 1 Success Criteria
+success_criteria:
+  target_clean_accuracy: 0.95    # >95% accuracy on val set
+  target_eer_lfw: 0.15           # EER <15% on LFW (for Week 3)
